@@ -25,33 +25,59 @@ var chatters = [];
 var chat_messages = [];
 
 // Redis Config
-fs.readFile("creds.json", "utf-8", function(err, data) {
-    if(err) throw err;
-    creds = JSON.parse(data);
-    client = redis.createClient("redis://" + creds.user + ":" + creds.password + "@" + creds.port);
+client = redis.createClient(process.env.REDIS_URL);
 
-    client.on('error',function(err){ 
-        console.error(err)
-    })
+client.on('error',function(err){ 
+    console.error(err)
+})
 
-    client.once("ready", function() {
+client.once("ready", function() {
 
-        client.get("chat_users", function(err, reply) {
+    client.get("chat_users", function(err, reply) {
 
-            if (reply) {
-                chatters = JSON.parse(reply);
-            }
-        });
-
-        client.get("chat_app_messages", function(err, reply) {
-
-            if (reply) {
-                chat_messages = JSON.parse(reply);
-            }
-        });
-
+        if (reply) {
+            chatters = JSON.parse(reply);
+        }
     });
+
+    client.get("chat_app_messages", function(err, reply) {
+
+        if (reply) {
+            chat_messages = JSON.parse(reply);
+        }
+    });
+
 });
+
+
+
+// fs.readFile("creds.json", "utf-8", function(err, data) {
+//     if(err) throw err;
+//     creds = JSON.parse(data);
+//     client = redis.createClient(process.env.REDIS_URL);
+
+//     client.on('error',function(err){ 
+//         console.error(err)
+//     })
+
+//     client.once("ready", function() {
+
+//         client.get("chat_users", function(err, reply) {
+
+//             if (reply) {
+//                 chatters = JSON.parse(reply);
+//             }
+//         });
+
+//         client.get("chat_app_messages", function(err, reply) {
+
+//             if (reply) {
+//                 chat_messages = JSON.parse(reply);
+//             }
+//         });
+
+//     });
+// });
 
 // JOIN CHAT
 app.post("/join", function(req, res) {
